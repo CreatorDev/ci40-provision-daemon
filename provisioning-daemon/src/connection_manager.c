@@ -246,12 +246,39 @@ void con_SendCommand(Clicker* clicker, NetworkCommand command)
 
 void con_SendCommandWithData(Clicker *clicker, NetworkCommand command, uint8_t *data, uint8_t dataLength)
 {
-    uint8_t buffer[dataLength+2];
+    uint8_t *buffer = NULL;
+
+    if (!clicker)
+    {
+        LOG(LOG_WARN, "Tried to send command using null clicker.");
+        return;
+    }
+    if (!data)
+    {
+        LOG(LOG_ERR, "Cannot send command using null pointer to data.");
+        return;
+    }
+    if (dataLength == 0)
+    {
+        LOG(LOG_WARN, "Tried to send 0 bytes of data along command.");
+        return;
+    }
+
+    buffer = malloc(dataLength+2);
+    if (!buffer)
+    {
+        LOG(LOG_ERR, "Failed to allocate buffer.");
+        return;
+    }
 
     buffer[0] = command;
     buffer[1] = dataLength;
     memcpy(&buffer[2], data, dataLength);
-    send(clicker->socket, buffer, dataLength+2, 0);
+
+    if (!send(clicker->socket, buffer, dataLength+2, 0))
+        LOG(LOG_ERR, "Failed to send command and data to clicker id %d", clicker->clickerID);
+
+    free(buffer);
 }
 
 void con_Disconnect(Clicker *clicker)
