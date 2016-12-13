@@ -256,11 +256,32 @@ void con_SendCommandWithData(Clicker *clicker, NetworkCommand command, uint8_t *
 
 void con_Disconnect(Clicker *clicker)
 {
-    int socket = clicker->socket;
-    getpeername(socket , (struct sockaddr*)&_Address , (socklen_t*)&_Addrlen);
-    inet_ntop(AF_INET6, &(_Address).sin6_addr, _Inet6AddrBuffer, INET6_ADDRSTRLEN);
-    LOG(LOG_INFO, "Clicker disconnected, id : %d , ip %s , port %d \n" , clicker->clickerID, _Inet6AddrBuffer , ntohs(_Address.sin6_port));
-    close( socket );
+    int socket = 0;
+    struct sockaddr_in6 addr;
+    char addr_str[INET6_ADDRSTRLEN];
+
+    if (!clicker)
+    {
+        LOG(LOG_WARN, "Tried to disconnect a null clicker.");
+        return;
+    }
+
+    socket = clicker->socket;
+
+    if (getpeername(socket, (struct sockaddr*)&addr, (socklen_t*)&_Addrlen) < 0)
+    {
+        LOG(LOG_ERR, "Failed to get peer name from socket of clicker id: %d", clicker->clickerID);
+        return;
+    }
+
+    if (inet_ntop(AF_INET6, &addr.sin6_addr, addr_str, INET6_ADDRSTRLEN) < 0)
+    {
+        LOG(LOG_ERR, "Failed to convert ipv6 address to string of clicker id: %d", clicker->clickerID);
+        return;
+    }
+
+    LOG(LOG_INFO, "Clicker disconnected, id : %d , ip %s , port %d \n" , clicker->clickerID, addr_str, ntohs(addr.sin6_port));
+    close(socket);
     _ClickerDisconnectedCallback(clicker);
     clicker_Release(clicker);
     g_pd_ConnectedClickers--;
