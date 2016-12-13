@@ -50,7 +50,6 @@
 static struct timeval _SelectTimeout;
 static int _MasterSocket;
 static struct sockaddr_in6 _Address;
-static int _MaxSD;
 static pd_CommandCallback _CommandCallback;
 static pd_ClickerDisconnectedCallback _ClickerDisconnectedCallback;
 static pd_ClickerConnectedCallback _ClickerConnectedCallback;
@@ -187,10 +186,10 @@ static void CheckConnections(void)
 void con_ProcessConnections(void)
 {
     int i = 0;
-    int activity, sd;
+    int activity, sd, max_sd = _MasterSocket;
     FD_ZERO(&_Readfs);
     FD_SET(_MasterSocket, &_Readfs);
-    _MaxSD = _MasterSocket;
+
 
     Clicker *ptr = clicker_GetClickers();
 
@@ -199,12 +198,12 @@ void con_ProcessConnections(void)
         sd = ptr->socket;
         if (sd > 0)
            FD_SET(sd, &_Readfs);
-        if (sd > _MaxSD)
-            _MaxSD = sd;
+        if (sd > max_sd)
+            max_sd = sd;
         ptr = ptr->next;
    }
 
-    activity = select(_MaxSD + 1, &_Readfs, NULL, NULL, &_SelectTimeout);
+    activity = select(max_sd + 1, &_Readfs, NULL, NULL, &_SelectTimeout);
 
     if (activity < 0)
     {
