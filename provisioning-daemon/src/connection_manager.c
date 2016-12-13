@@ -51,7 +51,6 @@ static struct timeval _SelectTimeout;
 static int _MasterSocket;
 static struct sockaddr_in6 _Address;
 static int _MaxSD;
-static char _Buffer[1024];
 static pd_CommandCallback _CommandCallback;
 static pd_ClickerDisconnectedCallback _ClickerDisconnectedCallback;
 static pd_ClickerConnectedCallback _ClickerConnectedCallback;
@@ -109,7 +108,8 @@ static int HandleRead(struct sockaddr_in6 *address)
         sd = clicker->socket;;
         if (FD_ISSET(sd, &_Readfs))
         {
-            if ((valread = read(sd, _Buffer, 1024)) == 0)
+            char buffer[1024];
+            if ((valread = read(sd, buffer, 1024)) == 0)
             {
                 LOG(LOG_DBG, "Read error. Disconnecting");
                 HandleDisconnect(clicker);
@@ -117,7 +117,7 @@ static int HandleRead(struct sockaddr_in6 *address)
             }
             else
             {
-                _CommandCallback(clicker, _Buffer);
+                _CommandCallback(clicker, buffer);
                 return 1;
             }
         }
