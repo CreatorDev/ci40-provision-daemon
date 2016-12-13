@@ -237,11 +237,18 @@ void con_ProcessConnections(void)
     }
 }
 
-
 void con_SendCommand(Clicker* clicker, NetworkCommand command)
 {
-    _Buffer[0] = command;
-    send(clicker->socket, _Buffer, 1, 0);
+    char cmd = command;
+
+    if (!clicker)
+    {
+        LOG(LOG_ERR, "Cannot send command using null pointer to clicker.");
+        return;
+    }
+
+    if (!send(clicker->socket, &cmd, sizeof(cmd), 0))
+        LOG(LOG_ERR, "Failed to send command %u to clicker id %d.", command, clicker->clickerID);
 }
 
 void con_SendCommandWithData(Clicker *clicker, NetworkCommand command, uint8_t *data, uint8_t dataLength)
