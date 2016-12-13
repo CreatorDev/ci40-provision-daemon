@@ -88,13 +88,13 @@ void HexStringToByteArray(const char* hexstr, uint8_t * dst, size_t len)
 
 bool GenerateRandomX(unsigned char* array, int length)
 {
-    unsigned long seed = GetCurrentTimeMillis();
-    srand(seed);
+    if (array == NULL)
+        return false;
 
     for (int i = 0; i < length; ++i)
         array[i] = rand() % 9;
 
-  return true;
+    return true;
 }
 
 void GenerateClickerTimeHash(char *buffer)

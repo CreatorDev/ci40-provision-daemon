@@ -656,6 +656,8 @@ int main(int argc, char **argv)
     sigemptyset(&action.sa_mask);
     sigaction (SIGINT, &action, NULL);
 
+    srand(time(NULL));
+
     if ((ret = ParseCommandArgs(argc, argv, &fptr)) < 0)
     {
         LOG(LOG_ERR, "Invalid command args");
