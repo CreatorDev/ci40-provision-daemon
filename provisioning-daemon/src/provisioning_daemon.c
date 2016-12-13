@@ -130,7 +130,7 @@ static bool _ModeChanged = false;
 /**
  * Main loop condition.
  */
-static short int _KeepRunning = 1;
+static volatile bool _KeepRunning = true;
 
 /**
  * Time in millis of last led state has been changed.
@@ -179,7 +179,7 @@ sem_t debugSemapthore;
 static void CtrlCHandler(int signal)
 {
     LOG(LOG_INFO, "Exit triggered...");
-    _KeepRunning = 0;
+    _KeepRunning = false;
 }
 
 /**
@@ -646,8 +646,16 @@ int main(int argc, char **argv)
 {
     sem_init(&debugSemapthore, 0, 1);
     int ret;
+    struct sigaction action = {
+        .sa_handler = CtrlCHandler,
+        .sa_flags = 0
+    };
     const char *fptr = NULL;
     FILE *logFile;
+
+    sigemptyset(&action.sa_mask);
+    sigaction (SIGINT, &action, NULL);
+
     if ((ret = ParseCommandArgs(argc, argv, &fptr)) < 0)
     {
         LOG(LOG_ERR, "Invalid command args");
@@ -668,7 +676,6 @@ int main(int argc, char **argv)
 
     bi_generateConst();
 
-    signal(SIGINT, CtrlCHandler);
     sem_init(&semaphore, 0, 1);
     history_init();
 
