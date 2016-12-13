@@ -36,18 +36,11 @@ void SetLeds(int numberOfClickers, int selectedClickerIndex, int activeClickerLe
     uint8_t mask = 0;
     int i = 0;
 
-    if (numberOfClickers == 0)
-    {
-        led_release();
-        return;
-    }
-
-    led_init();
 
     for (i = 0; i < numberOfClickers; i++)
         mask |= 1 << i;
 
-    if (activeClickerLedOn)
+    if (numberOfClickers > 0 && activeClickerLedOn)
         mask ^= 1 << selectedClickerIndex;
 
     led_set(ALL_LEDS, mask);

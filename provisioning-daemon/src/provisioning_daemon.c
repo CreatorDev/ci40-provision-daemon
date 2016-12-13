@@ -674,6 +674,8 @@ int main(int argc, char **argv)
 
     g_debugLevel = _PDConfig.logLevel;
 
+    led_init();
+
     bi_generateConst();
 
     sem_init(&semaphore, 0, 1);
@@ -845,6 +847,8 @@ int main(int argc, char **argv)
         if (loopEndTime - loopStartTime < 50)
             usleep(1000*(50-(loopEndTime-loopStartTime)));
     }
+
+    led_release();
 
     CleanupOnExit();
 
