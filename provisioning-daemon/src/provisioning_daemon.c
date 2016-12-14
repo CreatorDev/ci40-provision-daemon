@@ -436,6 +436,11 @@ void TryToSendPsk(Clicker *clicker)
         strncpy(_NetworkConfig.dnsServer, _PDConfig.dnsServer, sizeof(_NetworkConfig.dnsServer));
         strncpy(_NetworkConfig.endpointName, _PDConfig.endPointNamePattern, sizeof(_NetworkConfig.endpointName));
 
+        /* Ensure that all strings are terminated by a NULL character */
+        _NetworkConfig.defaultRouteUri[99] = '\0';
+        _NetworkConfig.dnsServer[99] = '\0';
+        _NetworkConfig.endpointName[COMMAND_ENDPOINT_NAME_LENGTH-1] = '\0';
+
         dataLen = 0;
         encodedData = softap_encodeBytes((uint8_t *)&_NetworkConfig, sizeof(_NetworkConfig) , clicker->sharedKey, &dataLen);
         LOG(LOG_INFO, "Sending Network Config to clicker with id : %d", clicker->clickerID);
