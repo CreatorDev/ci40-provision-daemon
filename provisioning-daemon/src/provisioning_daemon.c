@@ -686,10 +686,9 @@ int main(int argc, char **argv)
     if (_PDConfig.localProvisionControl)
     {
         LOG(LOG_INFO, "Enabling button controls.");
-        int result = switch_init();
-        result += switch_add_callback(SWITCH_1_PRESSED, Switch1PressedCallback);
-        result += switch_add_callback(SWITCH_2_PRESSED, Switch2PressedCallback);
-        if (result != 0)
+        if (switch_init() < 0
+        ||  switch_add_callback(SWITCH_1_PRESSED, Switch1PressedCallback) < 0
+        ||  switch_add_callback(SWITCH_2_PRESSED, Switch2PressedCallback) < 0)
             LOG(LOG_ERR, "Problems while acquiring buttons, local provision control might not work.");
     }
 
