@@ -71,9 +71,7 @@
                 g_debugStream = stdout;                         \
             fprintf(g_debugStream, "\n");                       \
             if (g_debugLevel == LOG_DBG)                        \
-            {                                                   \
                 DEBUG_PRINT;                                    \
-            }                                                   \
             fprintf(g_debugStream, __VA_ARGS__);                \
             fprintf(g_debugStream, "\n");                       \
             fflush(g_debugStream);                              \
