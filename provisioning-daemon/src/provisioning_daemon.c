@@ -687,8 +687,8 @@ int main(int argc, char **argv)
     {
         LOG(LOG_INFO, "Enabling button controls.");
         int result = switch_init();
-        result += switch_add_callback(0x02, Switch1PressedCallback);
-        result += switch_add_callback(0x04, Switch2PressedCallback);
+        result += switch_add_callback(SWITCH_1_PRESSED, Switch1PressedCallback);
+        result += switch_add_callback(SWITCH_2_PRESSED, Switch2PressedCallback);
         if (result != 0)
             LOG(LOG_ERR, "Problems while acquiring buttons, local provision control might not work.");
     }
