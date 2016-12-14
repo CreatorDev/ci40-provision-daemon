@@ -144,6 +144,11 @@ static Clicker *InnerGetClickerByID(int id, bool doLock)
 Clicker *clicker_New(int socket)
 {
     Clicker *newClicker = malloc(sizeof(Clicker));
+    if (!newClicker)
+    {
+        LOG(LOG_ERR, "Failed to allocate memory to create clicker structure.");
+        return NULL;
+    }
 
     newClicker->socket = socket;
     newClicker->clickerID = ++_IDCounter;
