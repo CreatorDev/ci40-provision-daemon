@@ -432,9 +432,9 @@ void TryToSendPsk(Clicker *clicker)
         FREE_AND_NULL(encodedData);
 
         memset(&_NetworkConfig, 0, sizeof(_NetworkConfig));
-        memcpy(&_NetworkConfig.defaultRouteUri, _PDConfig.defaultRouteUri, strnlen(_PDConfig.defaultRouteUri, 100));
-        memcpy(&_NetworkConfig.dnsServer, _PDConfig.dnsServer, strnlen(_PDConfig.dnsServer, 100));
-        memcpy(&_NetworkConfig.endpointName, _PDConfig.endPointNamePattern, strnlen(_PDConfig.endPointNamePattern, 24));
+        strncpy(_NetworkConfig.defaultRouteUri, _PDConfig.defaultRouteUri, sizeof(_NetworkConfig.defaultRouteUri));
+        strncpy(_NetworkConfig.dnsServer, _PDConfig.dnsServer, sizeof(_NetworkConfig.dnsServer));
+        strncpy(_NetworkConfig.endpointName, _PDConfig.endPointNamePattern, sizeof(_NetworkConfig.endpointName));
 
         dataLen = 0;
         encodedData = softap_encodeBytes((uint8_t *)&_NetworkConfig, sizeof(_NetworkConfig) , clicker->sharedKey, &dataLen);
