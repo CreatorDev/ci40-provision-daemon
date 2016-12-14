@@ -167,7 +167,7 @@ pd_Config _PDConfig = {
 };
 
 static sem_t semaphore;
-sem_t debugSemapthore;
+sem_t debugSemaphore;
 /***************************************************************************************************
  * Implementation
  **************************************************************************************************/
@@ -643,13 +643,13 @@ void CleanupOnExit(void)
 
     config_destroy(&_Cfg);
     sem_destroy(&semaphore);
-    sem_destroy(&debugSemapthore);
+    sem_destroy(&debugSemaphore);
     history_destroy();
 }
 
 int main(int argc, char **argv)
 {
-    sem_init(&debugSemapthore, 0, 1);
+    sem_init(&debugSemaphore, 0, 1);
     int ret;
     struct sigaction action = {
         .sa_handler = CtrlCHandler,

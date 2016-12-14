@@ -66,7 +66,7 @@
     do {                                                        \
         if (level <= g_debugLevel)                              \
         {                                                       \
-            sem_wait(&debugSemapthore);                         \
+            sem_wait(&debugSemaphore);                         \
             if (g_debugStream == NULL)                          \
                 g_debugStream = stdout;                         \
             fprintf(g_debugStream, "\n");                       \
@@ -77,7 +77,7 @@
             fprintf(g_debugStream, __VA_ARGS__);                \
             fprintf(g_debugStream, "\n");                       \
             fflush(g_debugStream);                              \
-            sem_post(&debugSemapthore);                         \
+            sem_post(&debugSemaphore);                         \
         }                                                       \
     } while (0)
 
@@ -86,6 +86,6 @@ extern FILE *g_debugStream;
 /** Debug level for logs. */
 extern int g_debugLevel;
 
-extern sem_t debugSemapthore;
+extern sem_t debugSemaphore;
 
 #endif    /* LOG_H */
