@@ -36,7 +36,7 @@
 #define COMMAND_ENDPOINT_NAME_LENGTH 24
 
 typedef enum {
-    NetworkCommand_NONE = 0,
+    NetworkCommand_NONE,
     NetworkCommand_ENABLE_HIGHLIGHT,
     NetworkCommand_DISABLE_HIGHLIGHT,
     NetworkCommand_KEEP_ALIVE,

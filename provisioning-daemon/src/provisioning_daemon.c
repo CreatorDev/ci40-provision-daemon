@@ -129,7 +129,7 @@ static bool _ModeChanged = false;
 /**
  * Main loop condition.
  */
-static short int _KeepRunning = 1;
+static volatile bool _KeepRunning = true;
 
 /**
  * Time in millis of last led state has been changed.
@@ -166,7 +166,7 @@ pd_Config _PDConfig = {
 };
 
 static sem_t semaphore;
-sem_t debugSemapthore;
+sem_t debugSemaphore;
 /***************************************************************************************************
  * Implementation
  **************************************************************************************************/
@@ -178,7 +178,7 @@ sem_t debugSemapthore;
 static void CtrlCHandler(int signal)
 {
     LOG(LOG_INFO, "Exit triggered...");
-    _KeepRunning = 0;
+    _KeepRunning = false;
 }
 
 /**
@@ -435,9 +435,14 @@ void TryToSendPsk(Clicker *clicker)
         FREE_AND_NULL(encodedData);
 
         memset(&_NetworkConfig, 0, sizeof(_NetworkConfig));
-        memcpy(&_NetworkConfig.defaultRouteUri, _PDConfig.defaultRouteUri, strnlen(_PDConfig.defaultRouteUri, 100));
-        memcpy(&_NetworkConfig.dnsServer, _PDConfig.dnsServer, strnlen(_PDConfig.dnsServer, 100));
-        memcpy(&_NetworkConfig.endpointName, _PDConfig.endPointNamePattern, strnlen(_PDConfig.endPointNamePattern, 24));
+        strncpy(_NetworkConfig.defaultRouteUri, _PDConfig.defaultRouteUri, sizeof(_NetworkConfig.defaultRouteUri));
+        strncpy(_NetworkConfig.dnsServer, _PDConfig.dnsServer, sizeof(_NetworkConfig.dnsServer));
+        strncpy(_NetworkConfig.endpointName, _PDConfig.endPointNamePattern, sizeof(_NetworkConfig.endpointName));
+
+        /* Ensure that all strings are terminated by a NULL character */
+        _NetworkConfig.defaultRouteUri[99] = '\0';
+        _NetworkConfig.dnsServer[99] = '\0';
+        _NetworkConfig.endpointName[COMMAND_ENDPOINT_NAME_LENGTH-1] = '\0';
 
         dataLen = 0;
         encodedData = softap_encodeBytes((uint8_t *)&_NetworkConfig, sizeof(_NetworkConfig) , clicker->sharedKey, &dataLen);
@@ -641,16 +646,26 @@ void CleanupOnExit(void)
 
     config_destroy(&_Cfg);
     sem_destroy(&semaphore);
-    sem_destroy(&debugSemapthore);
+    sem_destroy(&debugSemaphore);
     history_destroy();
 }
 
 int main(int argc, char **argv)
 {
-    sem_init(&debugSemapthore, 0, 1);
+    sem_init(&debugSemaphore, 0, 1);
     int ret;
+    struct sigaction action = {
+        .sa_handler = CtrlCHandler,
+        .sa_flags = 0
+    };
     const char *fptr = NULL;
     FILE *logFile;
+
+    sigemptyset(&action.sa_mask);
+    sigaction (SIGINT, &action, NULL);
+
+    srand(time(NULL));
+
     if ((ret = ParseCommandArgs(argc, argv, &fptr)) < 0)
     {
         LOG(LOG_ERR, "Invalid command args");
@@ -669,19 +684,19 @@ int main(int argc, char **argv)
 
     g_debugLevel = _PDConfig.logLevel;
 
+    led_init();
+
     bi_generateConst();
 
-    signal(SIGINT, CtrlCHandler);
     sem_init(&semaphore, 0, 1);
     history_init();
 
     if (_PDConfig.localProvisionControl)
     {
         LOG(LOG_INFO, "Enabling button controls.");
-        int result = switch_init();
-        result += switch_add_callback(0x02, Switch1PressedCallback);
-        result += switch_add_callback(0x04, Switch2PressedCallback);
-        if (result != 0)
+        if (switch_init() < 0
+        ||  switch_add_callback(SWITCH_1_PRESSED, Switch1PressedCallback) < 0
+        ||  switch_add_callback(SWITCH_2_PRESSED, Switch2PressedCallback) < 0)
             LOG(LOG_ERR, "Problems while acquiring buttons, local provision control might not work.");
     }
 
@@ -849,6 +864,8 @@ int main(int argc, char **argv)
         if (loopEndTime - loopStartTime < 50)
             usleep(1000*(50-(loopEndTime-loopStartTime)));
     }
+
+    led_release();
 
     CleanupOnExit();
 
