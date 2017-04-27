@@ -13,5 +13,7 @@ script:
   - cd $HOME/build && wget $CI40_FILE_URL && tar xfj $CI40_SDK.tar.bz2
   - cd $CI40_SDK && ./scripts/feeds update -a && ./scripts/feeds install -a
   - sed -i '/^PKG_SOURCE/ d' feeds/creatordev/provisioning-daemon/Makefile
+  - make package/letmecreate/compile
+  - make package/glib2/compile
   - make package/provisioning-daemon/prepare USE_SOURCE_DIR=$TRAVIS_BUILD_DIR V=s
   - make package/provisioning-daemon/compile V=s
